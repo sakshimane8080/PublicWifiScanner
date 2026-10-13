@@ -4,64 +4,30 @@
 
 SecureNet demonstrates simulated public WiFi risk profiles. It does not scan or assess real networks.
 
+## Deploy on Netlify
+
+The site runs entirely on Netlify. `netlify.toml` configures the browser assets and Netlify Functions. Only the generated `public` directory is published; Python sources, tests, and private files are not served.
+
+Netlify Identity manages account persistence, passwords, email confirmation, and sessions. The Identity activation marker is included in `.netlify/features/netlify-identity`. Keep registration open in **Project configuration > Identity** if visitors should be able to create accounts. Email confirmation is required by default.
+
+After deployment, open `register.html`, create an account, and follow the confirmation link in your email. Then sign in to use the simulated risk scanner and downloadable reports. Confirmation links are processed on all three pages.
+
+Existing accounts from the former Python backend are not automatically migrated. Register a new Netlify Identity account. The old Python backend files remain for reference, but the current frontend no longer uses them. No separate Python server or database credentials are required.
+
 ## Run locally
 
-1. Install Python 3.12 or newer.
-2. From this folder, create and activate a virtual environment.
-3. Install dependencies with `pip install -r requirements.txt`.
-4. Start the app with `python server.py`.
-5. Open `http://127.0.0.1:8000` and register an account.
+1. Use Node.js 22 or newer and install dependencies with `npm ci`.
+2. Use Netlify CLI with this linked site and Identity enabled.
+3. Run `netlify dev --port 8889` and open `http://localhost:8889`.
 
-Local accounts are stored in `securenet.sqlite3`; passwords are hashed before storage.
+Opening the HTML files directly or using the old Python server does not provide the required Identity client assets and Netlify Functions.
 
-## Deploy on PythonAnywhere
+## API and checks
 
-PythonAnywhere provides a public HTTPS website address for the Flask application. Its exact account and web-app limits depend on the current plan.
+`GET /health` provides a public health check. `GET /api/me`, `POST /api/risk`, and `POST /api/report` require a valid Netlify Identity session. Risk and report requests accept JSON containing `wifiType` (`open`, `weak`, or `strong`) and require a same-origin browser request. These operations are simulations; they do not store scan results.
 
-1. Create a PythonAnywhere account and open a **Bash console**.
-2. Clone the public repository and install its dependencies. Replace `YOUR_USERNAME` with your PythonAnywhere username and choose a Python version available on your account:
-
-   ```bash
-   cd ~
-   git clone https://github.com/sakshimane8080/PublicWifiScanner.git
-   cd ~/PublicWifiScanner
-   mkvirtualenv --python=/usr/bin/python3.13 securenet-venv
-   pip install -r requirements-pythonanywhere.txt
-   ```
-
-   Select the same Python version when creating the web app. If `/usr/bin/python3.13` is unavailable, use a Python version offered by PythonAnywhere.
-
-3. In the PythonAnywhere **Web** tab, choose **Add a new web app**, then **Manual configuration** and the matching Python version. In the **Virtualenv** section, enter `~/.virtualenvs/securenet-venv`.
-4. Open the WSGI configuration file linked on the Web tab. Replace its contents with the following:
-
-   ```python
-   import os
-   import sys
-
-   project_path = os.path.join(os.path.expanduser("~"), "PublicWifiScanner")
-   if project_path not in sys.path:
-       sys.path.insert(0, project_path)
-
-   from pythonanywhere_wsgi import application
-   ```
-
-5. Save the WSGI file, return to the Web tab, and click **Reload**. Open the web-app URL shown there and register a new account.
-
-The WSGI helper automatically enables HTTPS-only session cookies and puts SQLite in your home directory rather than beside the code, so Git pulls and app reloads do not replace the database. Keep the database private and use a unique password. To publish later code changes, push them to GitHub, then run `cd ~/PublicWifiScanner && git pull` in the PythonAnywhere console and reload the web app.
-
-The PythonAnywhere requirements file omits PostgreSQL and Gunicorn because this deployment uses SQLite and PythonAnywhere's WSGI server. The main `requirements.txt` remains for Render. If you have already cloned the repository in PythonAnywhere, update it with `cd ~/PublicWifiScanner && git pull` before configuring or reloading.
-
-For official provider-specific instructions, see [PythonAnywhere's Flask setup guide](https://help.pythonanywhere.com/pages/Flask/).
-
-## Deploy on Render for a CEP demonstration
-
-1. Put this project in a GitHub repository. Do not add `.env` files, `securenet.sqlite3`, or credentials.
-2. In Render, choose **New > Blueprint**, connect the repository, and select its `render.yaml`.
-3. Review the services and select the Free plans before confirming creation.
-4. Wait for the web service deployment, then visit its `onrender.com` URL and register.
-
-The Blueprint creates a public web service and a managed PostgreSQL database. The service uses HTTPS and secure session cookies on Render. Do not use the Free setup for real customer data: free web services can sleep when idle, and free Render PostgreSQL expires 30 days after creation. Back up anything important and migrate or upgrade before expiration.
+Run `npm test` for API and authentication-integration checks, and `npm run typecheck` for the function types. Netlify runs the configured asset build during deployment.
 
 ## Before a production launch
 
-The risk numbers are illustrative only, and the app is a student demonstration, not a real security scanner. A public production launch would need stronger operational protections such as monitoring, backups, abuse/rate limiting, account recovery, privacy disclosures, and an appropriate paid database plan.
+The risk numbers are illustrative only, and the app is a student demonstration, not a real security scanner. A public production launch would need stronger operational protections such as monitoring, abuse/rate limiting, account recovery, and privacy disclosures.

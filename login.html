@@ -195,11 +195,16 @@
     </p>
 
   </div>
+  <script src="/assets/auth.js"></script>
   <script>
     const passwordInput = document.getElementById("password");
     const togglePassword = document.getElementById("togglePassword");
     const form = document.getElementById("loginForm");
     const message = document.getElementById("message");
+
+    secureNetAuth.ready.then(function (session) {
+      if (session.user) window.location.replace("index.html");
+    });
 
     togglePassword.addEventListener("click", function () {
       const isPasswordHidden = passwordInput.type === "password";
@@ -214,31 +219,25 @@
 
       const email = document.getElementById("email").value.trim();
       const password = passwordInput.value;
+      const submitButton = form.querySelector('button[type="submit"]');
+      submitButton.disabled = true;
 
       try {
-        const response = await fetch("/api/login", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ email, password })
-        });
-
-        const result = await response.json();
-
-        if (!response.ok || !result.success) {
-          message.textContent = result.message || "Login failed.";
-          return;
-        }
+        await secureNetAuth.ready;
+        await secureNetAuth.login(email, password);
 
         message.style.color = "#62e1ff";
-        message.textContent = result.message || "Login successful! Opening scanner...";
+        message.textContent = "Login successful! Opening scanner...";
 
         setTimeout(function () {
           window.location.href = "index.html";
         }, 800);
       } catch (error) {
-        message.textContent = "Could not connect to the backend. Start the server first.";
+        message.textContent = error.message || "Sign-in is temporarily unavailable. Please try again.";
+      } finally {
+        submitButton.disabled = false;
       }
     });
   </script>
 </body>
-</html>s
+</html>
