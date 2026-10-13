@@ -695,32 +695,34 @@ footer {
     </p>
 </footer>
 
+<script src="/assets/auth.js"></script>
 <script>
     const appStatus = document.getElementById("appStatus");
 
     async function checkSession() {
         try {
+            const session = await secureNetAuth.ready;
+            if (session.error) return;
             const response = await fetch("/api/me");
-            if (!response.ok) {
+            if (response.status === 401) {
                 window.location.replace("login.html");
                 return;
             }
+            if (!response.ok) throw new Error("Session service unavailable.");
             const user = await response.json();
             document.getElementById("accountName").textContent = user.name;
         } catch (error) {
-            appStatus.textContent = "Could not verify your session. Please reopen this page using the local server.";
+            appStatus.textContent = "Could not verify your session. Please try refreshing this page.";
         }
     }
 
     document.getElementById("logoutButton").addEventListener("click", async function () {
         try {
-            const response = await fetch("/api/logout", { method: "POST" });
-            if (!response.ok) {
-                throw new Error("Logout request failed.");
-            }
+            await secureNetAuth.ready;
+            await secureNetAuth.logout();
             window.location.replace("login.html");
         } catch (error) {
-            appStatus.textContent = "Could not log out. Check that the local server is running.";
+            appStatus.textContent = "Could not log out. Please check your connection and try again.";
         }
     });
 

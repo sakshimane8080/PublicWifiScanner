@@ -109,11 +109,12 @@
         </p>
 
         <p style="font-size:12px">
-            Educational project: account details are stored in the project database.
-            Use a unique password; passwords are hashed before storage.
+            Educational project: accounts are securely managed by Netlify Identity.
+            Use a unique password and confirm your email before signing in.
         </p>
     </main>
 
+    <script src="/assets/auth.js"></script>
     <script>
         document.getElementById("registerForm")
             .addEventListener("submit", async function(event) {
@@ -123,28 +124,23 @@
                 const email = document.getElementById("email").value.trim();
                 const password = document.getElementById("password").value;
                 const message = document.getElementById("message");
+                const submitButton = this.querySelector('button[type="submit"]');
+                submitButton.disabled = true;
 
                 try {
-                    const response = await fetch("/api/register", {
-                        method: "POST",
-                        headers: { "Content-Type": "application/json" },
-                        body: JSON.stringify({ name, email, password })
-                    });
-
-                    const result = await response.json();
-
-                    if (!response.ok || !result.success) {
-                        message.style.color = "#ffb4b4";
-                        message.textContent = result.message || "Registration failed.";
-                        return;
-                    }
+                    await secureNetAuth.ready;
+                    const user = await secureNetAuth.signup(email, password, { full_name: name });
 
                     message.style.color = "#70e5fa";
-                    message.textContent = result.message || "Registration successful.";
+                    message.textContent = user.confirmedAt
+                        ? "Account created. You can now sign in."
+                        : "Account created. Check your email to confirm your account, then sign in.";
                     this.reset();
                 } catch (error) {
                     message.style.color = "#ffb4b4";
-                    message.textContent = "Could not connect to the backend. Start the server first.";
+                    message.textContent = error.message || "Registration is temporarily unavailable. Please try again.";
+                } finally {
+                    submitButton.disabled = false;
                 }
             });
     </script>
