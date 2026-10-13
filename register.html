@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Register | Public WiFi Risk Scanner</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+            font-family: Arial, sans-serif;
+        }
+
+        body {
+            margin: 0;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            color: white;
+            background: linear-gradient(135deg, #071426, #102e50);
+        }
+
+        .card {
+            width: 100%;
+            max-width: 420px;
+            padding: 32px;
+            border: 1px solid #285274;
+            border-radius: 18px;
+            background: #10233c;
+            box-shadow: 0 12px 35px #0005;
+        }
+
+        h1 {
+            text-align: center;
+            margin-bottom: 8px;
+        }
+
+        p {
+            text-align: center;
+            color: #b8c9dc;
+            line-height: 1.5;
+        }
+
+        label {
+            display: block;
+            margin: 18px 0 8px;
+        }
+
+        input {
+            width: 100%;
+            padding: 13px;
+            border: 1px solid #365571;
+            border-radius: 8px;
+            background: #091b30;
+            color: white;
+        }
+
+        button {
+            width: 100%;
+            margin-top: 24px;
+            padding: 14px;
+            border: none;
+            border-radius: 8px;
+            background: #12c9ed;
+            color: #071426;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        a {
+            color: #12c9ed;
+            text-decoration: none;
+        }
+
+        #message {
+            color: #70e5fa;
+            font-size: 14px;
+        }
+    </style>
+</head>
+
+<body>
+    <main class="card">
+        <h1>Create Account</h1>
+        <p>Public WiFi Risk Scanner</p>
+
+        <form id="registerForm">
+            <label for="name">Full Name</label>
+            <input id="name" type="text"
+                   placeholder="Enter your name" maxlength="100" required>
+
+            <label for="email">Email Address</label>
+            <input id="email" type="email"
+                   placeholder="Enter your email" maxlength="254" required>
+
+            <label for="password">Password</label>
+            <input id="password" type="password"
+                   placeholder="Use at least 8 characters"
+                   minlength="8" maxlength="128" required>
+
+            <button type="submit">Create Account</button>
+            <p id="message" role="status"></p>
+        </form>
+
+        <p>Already have an account?
+            <a href="login.html">Login here</a>
+        </p>
+
+        <p style="font-size:12px">
+            Educational project: account details are stored in the project database.
+            Use a unique password; passwords are hashed before storage.
+        </p>
+    </main>
+
+    <script>
+        document.getElementById("registerForm")
+            .addEventListener("submit", async function(event) {
+                event.preventDefault();
+
+                const name = document.getElementById("name").value.trim();
+                const email = document.getElementById("email").value.trim();
+                const password = document.getElementById("password").value;
+                const message = document.getElementById("message");
+
+                try {
+                    const response = await fetch("/api/register", {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({ name, email, password })
+                    });
+
+                    const result = await response.json();
+
+                    if (!response.ok || !result.success) {
+                        message.style.color = "#ffb4b4";
+                        message.textContent = result.message || "Registration failed.";
+                        return;
+                    }
+
+                    message.style.color = "#70e5fa";
+                    message.textContent = result.message || "Registration successful.";
+                    this.reset();
+                } catch (error) {
+                    message.style.color = "#ffb4b4";
+                    message.textContent = "Could not connect to the backend. Start the server first.";
+                }
+            });
+    </script>
+</body>
+</html>

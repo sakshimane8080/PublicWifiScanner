@@ -1,0 +1,923 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SecureNet | Public WiFi Risk Scanner</title>
+
+<style>
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    scroll-behavior: smooth;
+}
+
+body {
+    font-family: "Segoe UI", Arial, sans-serif;
+    background:
+        radial-gradient(circle at top left, rgba(22, 184, 232, 0.18), transparent 25%),
+        radial-gradient(circle at bottom right, rgba(168, 85, 247, 0.12), transparent 30%),
+        linear-gradient(135deg, #050b16 0%, #0b1220 45%, #0f1b2f 100%);
+    color: #edf5ff;
+    line-height: 1.6;
+}
+
+nav {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px 8%;
+    background: rgba(9, 18, 30, 0.8);
+    border-bottom: 1px solid rgba(105, 162, 255, 0.22);
+    backdrop-filter: blur(12px);
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    flex-wrap: wrap;
+    gap: 15px;
+}
+
+.logo {
+    font-size: 22px;
+    font-weight: bold;
+    color: #7ce7ff;
+    text-shadow: 0 0 18px rgba(124, 231, 255, 0.4);
+}
+
+nav a {
+    color: #dfeeff;
+    text-decoration: none;
+    margin-left: 22px;
+    font-size: 14px;
+    transition: color 0.2s ease;
+}
+
+nav a:hover {
+    color: #7ce7ff;
+}
+
+.nav-account {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    color: #bfd3ec;
+    font-size: 13px;
+}
+
+.logout-button {
+    padding: 7px 12px;
+    border: 1px solid rgba(124, 231, 255, 0.35);
+    border-radius: 8px;
+    background: rgba(255,255,255,0.04);
+    color: #e8f5ff;
+    cursor: pointer;
+}
+
+.logout-button:hover {
+    background: rgba(255,255,255,0.1);
+}
+
+#appStatus {
+    min-height: 1.5em;
+    margin: 10px 0;
+    color: #ffb4b4;
+    text-align: center;
+}
+
+.checklist-card {
+    padding: 28px;
+}
+
+.checklist-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 12px;
+    font-weight: 600;
+}
+
+.checklist-score {
+    color: #48d7ff;
+    font-size: 20px;
+}
+
+.checklist {
+    list-style: none;
+    margin-top: 18px;
+    display: grid;
+    gap: 12px;
+}
+
+.checklist li {
+    background: #0d1a2e;
+    border: 1px solid #223c5a;
+    border-radius: 10px;
+    padding: 12px 14px;
+    color: #d7e5f7;
+}
+
+.checklist input {
+    width: auto;
+    margin-right: 10px;
+    accent-color: #16b8e8;
+}
+
+.checklist-status {
+    margin-top: 18px;
+    font-weight: 600;
+    color: #6ee7ff;
+}
+
+.hero {
+    padding: 75px 8% 60px;
+    text-align: center;
+    background:
+      radial-gradient(circle at top, rgba(110, 231, 255, 0.18), transparent 18%),
+      radial-gradient(circle at 20% 20%, rgba(59, 130, 246, 0.3), transparent 32%),
+      linear-gradient(135deg, #0d1d2d 0%, #091521 52%, #07111d 100%);
+    border-bottom: 1px solid rgba(115, 160, 255, 0.18);
+}
+
+.tag {
+    display: inline-block;
+    color: #7ce7ff;
+    border: 1px solid rgba(124, 231, 255, 0.5);
+    background: rgba(16, 40, 60, 0.8);
+    padding: 6px 14px;
+    border-radius: 30px;
+    font-size: 12px;
+    letter-spacing: 1px;
+    box-shadow: 0 0 20px rgba(92, 202, 255, 0.18);
+}
+
+.hero h1 {
+    font-size: clamp(32px, 5vw, 52px);
+    line-height: 1.2;
+    margin: 22px 0;
+    text-shadow: 0 0 24px rgba(72, 215, 255, 0.18);
+}
+
+.hero h1 span {
+    color: #7ce7ff;
+}
+
+.hero p {
+    color: #bfd3ec;
+    max-width: 650px;
+    margin: 0 auto 25px;
+    font-size: 1.05rem;
+}
+
+.button {
+    display: inline-block;
+    background: linear-gradient(135deg, #25d0ff 0%, #6d7bff 100%);
+    color: #07111d;
+    text-decoration: none;
+    padding: 12px 24px;
+    border-radius: 10px;
+    border: none;
+    font-size: 15px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    box-shadow: 0 12px 28px rgba(91, 128, 255, 0.32);
+}
+
+.button:hover {
+    background: linear-gradient(135deg, #84ecff 0%, #8c9bff 100%);
+    transform: translateY(-2px);
+    box-shadow: 0 16px 32px rgba(91, 128, 255, 0.4);
+}
+
+.container {
+    max-width: 1100px;
+    margin: auto;
+    padding: 30px 22px;
+}
+
+.hero-content {
+    max-width: 1100px;
+    margin: 0 auto;
+}
+
+.hero-actions {
+    display: flex;
+    justify-content: center;
+    gap: 14px;
+    flex-wrap: wrap;
+    margin-bottom: 28px;
+}
+
+.button.secondary {
+    background: rgba(255,255,255,0.04);
+    color: #e8f5ff;
+    border: 1px solid rgba(148, 163, 184, 0.4);
+    box-shadow: none;
+}
+
+.button.secondary:hover {
+    background: rgba(255,255,255,0.08);
+}
+
+.hero-metrics {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 18px;
+    max-width: 900px;
+    margin: 0 auto;
+}
+
+.stat-box {
+    background: rgba(11, 20, 30, 0.72);
+    border: 1px solid rgba(123, 170, 255, 0.18);
+    border-radius: 16px;
+    padding: 18px 16px;
+    text-align: center;
+    box-shadow: 0 14px 30px rgba(8, 16, 28, 0.35);
+}
+
+.stat-box strong {
+    display: block;
+    font-size: clamp(22px, 3vw, 30px);
+    color: #7ce7ff;
+    margin-bottom: 8px;
+}
+
+.stat-box span {
+    color: #bfd3ec;
+    font-size: 13px;
+}
+
+.section-title {
+    margin-bottom: 8px;
+    font-size: 27px;
+    background: linear-gradient(90deg, #b0f5ff 0%, #8fa8ff 45%, #c8a9ff 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    display: inline-block;
+}
+
+.subtitle {
+    color: #9bb6d5;
+    margin-bottom: 24px;
+    font-size: 1rem;
+}
+
+.grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 22px;
+}
+
+.card {
+    background: linear-gradient(180deg, rgba(17, 28, 43, 0.96), rgba(11, 20, 31, 0.96));
+    border: 1px solid rgba(123, 170, 255, 0.18);
+    border-radius: 18px;
+    padding: 25px;
+    min-width: 0;
+    box-shadow: 0 10px 30px rgba(5, 10, 18, 0.38);
+    transition: transform 0.25s ease, border-color 0.25s ease;
+}
+
+.card:hover {
+    transform: translateY(-3px);
+    border-color: rgba(124, 231, 255, 0.42);
+}
+
+.card h3 {
+    margin-bottom: 14px;
+    color: #eff8ff;
+}
+
+.card p {
+    color: #bfd0e8;
+}
+
+select {
+    width: 100%;
+    padding: 13px;
+    margin: 12px 0 18px;
+    color: white;
+    background: linear-gradient(180deg, #0a1525, #0d1d2d);
+    border: 1px solid #3a5879;
+    border-radius: 10px;
+    font-size: 15px;
+    outline: none;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.04);
+}
+
+.full-button {
+    width: 100%;
+}
+
+.result {
+    display: none;
+    margin-top: 24px;
+    padding-top: 20px;
+    border-top: 1px solid rgba(118, 172, 255, 0.2);
+}
+
+.risk-number {
+    font-size: 42px;
+    font-weight: bold;
+    margin: 8px 0;
+    text-shadow: 0 0 22px rgba(255,255,255,0.12);
+}
+
+.progress {
+    height: 12px;
+    background: rgba(40, 57, 80, 0.9);
+    border-radius: 999px;
+    overflow: hidden;
+    margin: 12px 0;
+    border: 1px solid rgba(120, 153, 255, 0.2);
+    box-shadow: inset 0 2px 6px rgba(0,0,0,0.2);
+}
+
+.progress-fill {
+    height: 100%;
+    width: 0;
+    transition: width 0.6s ease;
+    border-radius: 999px;
+    background: linear-gradient(90deg, #25d0ff, #6d7bff);
+    box-shadow: 0 0 16px rgba(72, 215, 255, 0.5);
+}
+
+.threats {
+    margin: 12px 0 12px 20px;
+    color: #c7d5e7;
+}
+
+.tip {
+    padding: 13px;
+    background: rgba(11, 24, 41, 0.9);
+    border: 1px solid rgba(120, 153, 255, 0.28);
+    border-radius: 9px;
+    margin-top: 10px;
+    color: #d5e3f4;
+}
+
+.icon {
+    font-size: 25px;
+    margin-bottom: 8px;
+    filter: drop-shadow(0 0 12px rgba(37, 208, 255, 0.35));
+}
+
+.small {
+    font-size: 12px;
+    color: #8da2bc;
+    margin-top: 14px;
+}
+
+footer {
+    margin-top: 30px;
+    text-align: center;
+    padding: 30px 20px;
+    background: linear-gradient(180deg, rgba(10, 17, 26, 0.9), rgba(6, 10, 18, 1));
+    color: #91a5bf;
+    border-top: 1px solid rgba(123, 170, 255, 0.18);
+}
+
+@media (max-width: 650px) {
+    nav {
+        padding: 18px 5%;
+    }
+
+    nav a {
+        margin: 0 10px 0 0;
+    }
+
+    .hero {
+        padding: 55px 6%;
+    }
+
+    .hero-metrics {
+        grid-template-columns: 1fr;
+    }
+
+    .hero-actions {
+        flex-direction: column;
+    }
+
+    .grid {
+        grid-template-columns: 1fr;
+    }
+
+    .container {
+        padding: 22px 16px;
+    }
+
+    nav a {
+        margin-left: 12px;
+        margin-right: 0;
+    }
+}
+</style>
+</head>
+
+<body>
+
+<nav>
+    <div class="logo">🛡 SecureNet</div>
+    <div>
+        <a href="#home">Home</a>
+        <a href="#scanner">Scanner</a>
+        <a href="#simulation">Simulation</a>
+        <a href="#safety">Safety Tips</a>
+        <a href="#checklist">Checklist</a>
+        <a href="#about">About</a>
+    </div>
+    <div class="nav-account">
+        <span id="accountName"></span>
+        <button class="logout-button" id="logoutButton" type="button">Log out</button>
+    </div>
+</nav>
+
+<header class="hero" id="home">
+    <div class="hero-content">
+        <span class="tag">CYBER SECURITY AWARENESS</span>
+
+        <h1>Stay Safe on <span>Public WiFi</span></h1>
+
+        <p>
+            Understand wireless network security risks
+            with our interactive educational simulation.
+            Learn about common threats and safer browsing.
+        </p>
+
+        <div class="hero-actions">
+            <a class="button" href="#scanner">Start Risk Analysis →</a>
+            <a class="button secondary" href="#checklist">View Safety Checklist</a>
+        </div>
+
+        <div class="hero-metrics">
+            <div class="stat-box">
+                <strong>85%</strong>
+                <span>Illustrative open hotspot score</span>
+            </div>
+            <div class="stat-box">
+                <strong>4</strong>
+                <span>Educational threat scenarios</span>
+            </div>
+            <div class="stat-box">
+                <strong>0</strong>
+                <span>Real networks scanned</span>
+            </div>
+        </div>
+    </div>
+</header>
+
+<main class="container">
+
+    <section id="scanner">
+        <h2 class="section-title">WiFi Risk Scanner</h2>
+        <p class="subtitle">
+            Select a network type to view its simulated risk profile.
+        </p>
+
+        <div class="grid">
+            <div class="card">
+                <div class="icon">📡</div>
+                <h3>Network Assessment</h3>
+                <p>
+                    Choose a WiFi security type to see
+                    possible threats and recommendations.
+                </p>
+
+                <label for="wifi">Select network type</label>
+
+                <select id="wifi">
+                    <option value="open">Open Public WiFi</option>
+                    <option value="weak">Weak Secured WiFi</option>
+                    <option value="strong">Strong Secured WiFi</option>
+                </select>
+
+                <button class="button full-button"
+                    onclick="scanWiFi()">
+                    Analyze Network
+                </button>
+
+                <p class="small">
+                    Demonstration only. No real network is scanned.
+                </p>
+            </div>
+
+            <div class="card" id="result">
+                <h3>Analysis Results</h3>
+                <p id="networkName">Selected network</p>
+                <div class="risk-number" id="riskNumber">--%</div>
+                <h3 id="riskLevel">Waiting for analysis</h3>
+
+                <div class="progress">
+                    <div class="progress-fill" id="progressFill"></div>
+                </div>
+
+                <h3>Possible Threats</h3>
+                <ul class="threats" id="threatList"></ul>
+
+                <p id="advice"></p>
+
+                <button onclick="downloadReport()" class="button full-button">
+                    Download Risk Report
+                </button>
+                <p id="appStatus" role="status" aria-live="polite"></p>
+
+                <p class="small">
+                    The score is illustrative, not a measured
+                    probability or a real security assessment.
+                </p>
+            </div>
+        </div>
+    </section>
+
+    <section id="checklist" style="margin-top:55px">
+        <h2 class="section-title">Quick Safety Checklist</h2>
+        <p class="subtitle">
+            Mark the habits you follow before joining a public hotspot.
+        </p>
+
+        <div class="card checklist-card">
+            <div class="checklist-header">
+                <span>Protection score</span>
+                <span class="checklist-score" id="checklistScore">0/6</span>
+            </div>
+
+            <div class="progress">
+                <div class="progress-fill" id="checklistFill"></div>
+            </div>
+
+            <ul class="checklist">
+                <li><label><input type="checkbox" class="safety-check"> I confirmed the WiFi name with staff or the venue.</label></li>
+                <li><label><input type="checkbox" class="safety-check"> I only visit websites using HTTPS.</label></li>
+                <li><label><input type="checkbox" class="safety-check"> I avoid online banking or payments on public WiFi.</label></li>
+                <li><label><input type="checkbox" class="safety-check"> I disable auto-connect to unknown networks.</label></li>
+                <li><label><input type="checkbox" class="safety-check"> I use a trusted VPN when needed.</label></li>
+                <li><label><input type="checkbox" class="safety-check"> I keep my device and apps updated.</label></li>
+            </ul>
+
+            <p class="checklist-status" id="checklistStatus">Start building safer browsing habits.</p>
+        </div>
+    </section>
+
+    <section id="safety" style="margin-top:55px">
+        <h2 class="section-title">Stay Protected</h2>
+        <p class="subtitle">
+            Follow these practices when using public networks.
+        </p>
+
+        <div class="grid">
+            <div class="card">
+                <div class="icon">🔒</div>
+                <h3>Use Trusted Security Tools</h3>
+                <p>Consider a reputable VPN when using public WiFi.</p>
+            </div>
+
+            <div class="card">
+                <div class="icon">🌐</div>
+                <h3>Check HTTPS</h3>
+                <p>Use encrypted websites and verify the correct domain.</p>
+            </div>
+
+            <div class="card">
+                <div class="icon">🏦</div>
+                <h3>Avoid Sensitive Transactions</h3>
+                <p>Avoid banking on unknown public networks.</p>
+            </div>
+
+            <div class="card">
+                <div class="icon">📵</div>
+                <h3>Disable Auto-Connect</h3>
+                <p>Stop your device from joining unknown networks automatically.</p>
+            </div>
+        </div>
+    </section>
+    <section id="simulation" style="margin-top:55px">
+
+    <h2 class="section-title">Cyber Attack Simulation</h2>
+
+    <p class="subtitle">
+        Explore how common public WiFi threats may work.
+        These are educational simulations only.
+    </p>
+
+    <div class="grid">
+
+        <div class="card">
+            <div class="icon">🕵️</div>
+            <h3>Data Sniffing</h3>
+            <p>
+                Learn how unencrypted information on an
+                unsafe network may be exposed.
+            </p>
+            <button class="button full-button"
+                onclick="showSimulation('sniffing')">
+                Explore Simulation
+            </button>
+        </div>
+
+        <div class="card">
+            <div class="icon">🔀</div>
+            <h3>Man-in-the-Middle</h3>
+            <p>
+                Understand how an attacker may attempt
+                to position themselves between two parties.
+            </p>
+            <button class="button full-button"
+                onclick="showSimulation('mitm')">
+                Explore Simulation
+            </button>
+        </div>
+
+        <div class="card">
+            <div class="icon">📶</div>
+            <h3>Fake WiFi Hotspot</h3>
+            <p>
+                Learn why unknown networks with familiar
+                names can be suspicious.
+            </p>
+            <button class="button full-button"
+                onclick="showSimulation('fake')">
+                Explore Simulation
+            </button>
+        </div>
+
+        <div class="card">
+            <div class="icon">🔑</div>
+            <h3>Fake Login Page</h3>
+            <p>
+                Discover warning signs of a fraudulent
+                login page designed to steal information.
+            </p>
+            <button class="button full-button"
+                onclick="showSimulation('login')">
+                Explore Simulation
+            </button>
+        </div>
+
+    </div>
+
+    <div class="card" id="simulationResult"
+         style="display:none; margin-top:22px"
+         aria-live="polite">
+    </div>
+
+</section>
+    <section id="about" style="margin-top:55px">
+        <div class="card">
+            <h2 class="section-title">About Our Project</h2>
+            <p>
+                Public WiFi Risk Scanner is a CEP project
+                designed to spread cybersecurity awareness.
+                It explains possible public WiFi risks through
+                a safe, educational simulation.
+            </p>
+
+            <p style="margin-top:15px">
+                <strong>Domain:</strong> Cyber Security
+            </p>
+
+            <p>
+                <strong>Team Members:</strong>
+                Sakshi Mane, Aditi Pandit, Suhani Pethe, Prachi Patole
+            </p>
+        </div>
+    </section>
+
+</main>
+
+<footer>
+    <p>SecureNet | Public WiFi Risk Scanner</p>
+    <p class="small">
+        CEP Educational Project · Simulation Only · No Real Attacks
+    </p>
+</footer>
+
+<script>
+    const appStatus = document.getElementById("appStatus");
+
+    async function checkSession() {
+        try {
+            const response = await fetch("/api/me");
+            if (!response.ok) {
+                window.location.replace("login.html");
+                return;
+            }
+            const user = await response.json();
+            document.getElementById("accountName").textContent = user.name;
+        } catch (error) {
+            appStatus.textContent = "Could not verify your session. Please reopen this page using the local server.";
+        }
+    }
+
+    document.getElementById("logoutButton").addEventListener("click", async function () {
+        try {
+            const response = await fetch("/api/logout", { method: "POST" });
+            if (!response.ok) {
+                throw new Error("Logout request failed.");
+            }
+            window.location.replace("login.html");
+        } catch (error) {
+            appStatus.textContent = "Could not log out. Check that the local server is running.";
+        }
+    });
+
+    checkSession();
+
+    const checklistBoxes = document.querySelectorAll(".safety-check");
+    const checklistFill = document.getElementById("checklistFill");
+    const checklistScore = document.getElementById("checklistScore");
+    const checklistStatus = document.getElementById("checklistStatus");
+
+    function updateChecklist() {
+        const total = checklistBoxes.length;
+        let checked = 0;
+
+        checklistBoxes.forEach(function (box) {
+            if (box.checked) checked += 1;
+        });
+
+        const percentage = Math.round((checked / total) * 100);
+        checklistScore.textContent = checked + "/" + total;
+        checklistFill.style.width = percentage + "%";
+        checklistFill.style.background = percentage >= 75 ? "#4ade80" : percentage >= 50 ? "#fbbf24" : "#fb7185";
+
+        if (percentage === 100) {
+            checklistStatus.textContent = "Excellent! You are following strong public WiFi habits.";
+        } else if (percentage >= 60) {
+            checklistStatus.textContent = "Great start. A few extra checks will make you even safer.";
+        } else if (percentage >= 30) {
+            checklistStatus.textContent = "You are building safer habits. Keep improving your protection.";
+        } else {
+            checklistStatus.textContent = "Start building safer browsing habits.";
+        }
+    }
+
+    checklistBoxes.forEach(function (box) {
+        box.addEventListener("change", updateChecklist);
+    });
+
+    updateChecklist();
+
+    function showSimulation(type) {
+
+    const result = document.getElementById("simulationResult");
+
+    const simulations = {
+        sniffing: {
+            title: "🕵️ Data Sniffing",
+            flow: "Device → Public Network → Possible Data Exposure",
+            explanation:
+                "On an unsafe network, unencrypted traffic may be exposed to others who can observe it. HTTPS helps protect data in transit.",
+            safety:
+                "Use HTTPS websites and avoid sending sensitive information over untrusted connections."
+        },
+
+        mitm: {
+            title: "🔀 Man-in-the-Middle Attack",
+            flow: "User ↔ Untrusted Intermediary ↔ Website",
+            explanation:
+                "An attacker may try to intercept or alter communication between two parties. Proper encryption and certificate checks help reduce this risk.",
+            safety:
+                "Check browser security warnings and never ignore certificate errors."
+        },
+
+        fake: {
+            title: "📶 Fake WiFi Hotspot",
+            flow: "User → Suspicious Hotspot → Potential Risk",
+            explanation:
+                "A fake hotspot may imitate the name of a trusted WiFi network to trick people into connecting.",
+            safety:
+                "Confirm the exact network name with the venue before connecting."
+        },
+
+        login: {
+            title: "🔑 Fake Login Page",
+            flow: "Unexpected Login Page → Check Carefully → Decide Safely",
+            explanation:
+                "A fraudulent page may imitate a genuine sign-in screen to collect credentials.",
+            safety:
+                "Verify the website address and never enter passwords on suspicious pages."
+        }
+    };
+
+    const item = simulations[type];
+
+    if (!item) return;
+
+    result.style.display = "block";
+
+    result.replaceChildren();
+
+    const heading = document.createElement("h3");
+    heading.textContent = item.title;
+
+    const flow = document.createElement("p");
+    flow.style.cssText =
+        "color:#48d7ff; margin:16px 0; font-weight:bold;";
+    flow.textContent = item.flow;
+
+    const explanation = document.createElement("p");
+    explanation.textContent = item.explanation;
+
+    const safety = document.createElement("p");
+    safety.style.marginTop = "16px";
+    safety.textContent = "Safety Tip: " + item.safety;
+
+    const note = document.createElement("p");
+    note.className = "small";
+    note.textContent =
+        "Educational simulation only. No real attack is performed.";
+
+    result.append(heading, flow, explanation, safety, note);
+
+    result.scrollIntoView({
+        behavior: "smooth",
+        block: "nearest"
+    });
+}
+function scanWiFi() {
+    const wifi = document.getElementById("wifi").value;
+    appStatus.textContent = "";
+
+    fetch("/api/risk", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ wifiType: wifi })
+    })
+    .then(function (response) {
+        if (response.status === 401) {
+            window.location.replace("login.html");
+            throw new Error("Your session expired. Please log in again.");
+        }
+        if (!response.ok) {
+            throw new Error("Risk API request failed");
+        }
+        return response.json();
+    })
+    .then(function (data) {
+        document.getElementById("result").style.display = "block";
+        document.getElementById("networkName").textContent = data.network;
+        document.getElementById("riskNumber").textContent = data.risk + "%";
+        document.getElementById("riskNumber").style.color = data.color;
+        document.getElementById("riskLevel").textContent = data.level;
+        document.getElementById("riskLevel").style.color = data.color;
+        document.getElementById("progressFill").style.width = data.risk + "%";
+        document.getElementById("progressFill").style.background = data.color;
+        document.getElementById("advice").textContent = "Safety advice: " + data.advice;
+
+        const list = document.getElementById("threatList");
+        list.replaceChildren();
+
+        data.threats.forEach(function (threat) {
+            const item = document.createElement("li");
+            item.textContent = threat;
+            list.appendChild(item);
+        });
+
+        document.getElementById("result").scrollIntoView({
+            behavior: "smooth",
+            block: "nearest"
+        });
+    })
+    .catch(function (error) {
+        appStatus.textContent = error.message;
+    });
+}
+function downloadReport() {
+    const wifiType = document.getElementById("wifi").value;
+    appStatus.textContent = "";
+
+    fetch("/api/report", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ wifiType: wifiType })
+    })
+    .then(function (response) {
+        if (response.status === 401) {
+            window.location.replace("login.html");
+            throw new Error("Your session expired. Please log in again.");
+        }
+        if (!response.ok) {
+            throw new Error("Report generation failed");
+        }
+        return response.blob();
+    })
+    .then(function (blob) {
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement("a");
+        link.href = url;
+        link.download = "WiFi_Risk_Report.txt";
+        link.click();
+        URL.revokeObjectURL(url);
+    })
+    .catch(function (error) {
+        appStatus.textContent = error.message;
+    });
+}
+</script>
+
+</body>
+</html>

@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Secure Login | WiFi Risk Scanner</title>
+
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: Arial, sans-serif;
+    }
+
+    body {
+      min-height: 100vh;
+      background: #071426;
+      color: white;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 20px;
+    }
+
+    .login-container {
+      width: 100%;
+      max-width: 420px;
+      padding: 35px;
+      background: #10243e;
+      border: 1px solid #244565;
+      border-radius: 20px;
+      box-shadow: 0 15px 45px #0005;
+    }
+
+    .logo {
+      width: 65px;
+      height: 65px;
+      margin: 0 auto 20px;
+      border-radius: 18px;
+      background: #00cfff;
+      color: #071426;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-size: 30px;
+    }
+
+    h1 {
+      text-align: center;
+      font-size: 27px;
+      margin-bottom: 10px;
+    }
+
+    .subtitle {
+      text-align: center;
+      color: #a9bdd3;
+      font-size: 14px;
+      line-height: 1.6;
+      margin-bottom: 28px;
+    }
+
+    label {
+      display: block;
+      margin: 17px 0 8px;
+      font-size: 14px;
+    }
+
+    input {
+      width: 100%;
+      padding: 13px;
+      background: #09192c;
+      color: white;
+      border: 1px solid #34506e;
+      border-radius: 9px;
+      outline: none;
+      font-size: 15px;
+    }
+
+    input:focus {
+      border-color: #00cfff;
+    }
+
+    .password-box {
+      display: flex;
+      gap: 8px;
+    }
+
+    .password-box input {
+      min-width: 0;
+    }
+
+    .show-btn {
+      padding: 0 10px;
+      background: #203b59;
+      color: white;
+      border: none;
+      border-radius: 9px;
+      cursor: pointer;
+    }
+
+    .login-btn {
+      width: 100%;
+      margin-top: 25px;
+      padding: 14px;
+      background: #00cfff;
+      color: #071426;
+      font-weight: bold;
+      font-size: 16px;
+      border: none;
+      border-radius: 9px;
+      cursor: pointer;
+    }
+
+    .login-btn:hover {
+      background: #62e1ff;
+    }
+
+    #message {
+      margin-top: 15px;
+      text-align: center;
+      font-size: 14px;
+      line-height: 1.5;
+    }
+
+    .footer {
+      text-align: center;
+      margin-top: 24px;
+      font-size: 12px;
+      color: #91a9c2;
+    }
+
+    @media (max-width: 450px) {
+      .login-container {
+        padding: 25px 20px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="login-container">
+
+    <div class="logo">🛡️</div>
+
+    <h1>Welcome Back!</h1>
+
+    <p class="subtitle">
+      Public WiFi Risk Scanner<br>
+      Sign in to explore network safety.
+    </p>
+
+    <form id="loginForm">
+      <label for="email">Email Address</label>
+      <input
+        type="email"
+        id="email"
+        placeholder="Enter your email"
+        required
+      >
+
+      <label for="password">Password</label>
+
+      <div class="password-box">
+        <input
+          type="password"
+          id="password"
+          placeholder="Enter any demo password"
+          required
+        >
+
+        <button
+          type="button"
+          class="show-btn"
+          id="togglePassword"
+          aria-label="Show password"
+        >Show</button>
+      </div>
+
+      <button type="submit" class="login-btn">
+        Login Securely →
+      </button>
+      <p style="text-align:center; margin-top:20px;">
+    Don't have an account?
+    <a href="register.html" style="color:#12c9ed;">
+        Register here
+    </a>
+</p>
+
+      <p id="message" aria-live="polite"></p>
+    </form>
+
+    <p class="footer">
+      Educational Project · Public WiFi Security
+    </p>
+
+  </div>
+  <script>
+    const passwordInput = document.getElementById("password");
+    const togglePassword = document.getElementById("togglePassword");
+    const form = document.getElementById("loginForm");
+    const message = document.getElementById("message");
+
+    togglePassword.addEventListener("click", function () {
+      const isPasswordHidden = passwordInput.type === "password";
+      passwordInput.type = isPasswordHidden ? "text" : "password";
+      togglePassword.textContent = isPasswordHidden ? "Hide" : "Show";
+      togglePassword.setAttribute("aria-label", isPasswordHidden ? "Hide password" : "Show password");
+    });
+
+    form.addEventListener("submit", async function (event) {
+      event.preventDefault();
+      message.style.color = "#ffb4b4";
+
+      const email = document.getElementById("email").value.trim();
+      const password = passwordInput.value;
+
+      try {
+        const response = await fetch("/api/login", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ email, password })
+        });
+
+        const result = await response.json();
+
+        if (!response.ok || !result.success) {
+          message.textContent = result.message || "Login failed.";
+          return;
+        }
+
+        message.style.color = "#62e1ff";
+        message.textContent = result.message || "Login successful! Opening scanner...";
+
+        setTimeout(function () {
+          window.location.href = "index.html";
+        }, 800);
+      } catch (error) {
+        message.textContent = "Could not connect to the backend. Start the server first.";
+      }
+    });
+  </script>
+</body>
+</html>s
