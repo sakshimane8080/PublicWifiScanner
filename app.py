@@ -8,9 +8,7 @@ import time
 from contextlib import contextmanager
 from urllib.parse import urlparse
 
-import psycopg
 from flask import Flask, jsonify, make_response, redirect, request, send_from_directory
-from psycopg.rows import dict_row
 from werkzeug.middleware.proxy_fix import ProxyFix
 
 
@@ -44,6 +42,9 @@ def database_connection():
         connection.execute("PRAGMA foreign_keys = ON")
         placeholder = "?"
     else:
+        import psycopg
+        from psycopg.rows import dict_row
+
         connection = psycopg.connect(url, row_factory=dict_row)
         placeholder = "%s"
 
@@ -334,7 +335,12 @@ def create_app():
                     """.format(*([placeholder] * 4)),
                     (email, name, hash_password(password), int(time.time())),
                 )
-        except (sqlite3.IntegrityError, psycopg.errors.UniqueViolation):
+        except Exception as error:
+            is_duplicate = isinstance(error, sqlite3.IntegrityError) or (
+                getattr(error, "sqlstate", None) == "23505"
+            )
+            if not is_duplicate:
+                raise
             return jsonify(success=False, message="An account with this email already exists."), 409
         return jsonify(success=True, message="Account created. You can now log in."), 201
 

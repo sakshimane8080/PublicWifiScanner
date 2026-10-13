@@ -26,13 +26,13 @@ PythonAnywhere provides a public HTTPS website address for the Flask application
    git clone https://github.com/sakshimane8080/PublicWifiScanner.git
    cd ~/PublicWifiScanner
    mkvirtualenv --python=/usr/bin/python3.13 securenet-venv
-   pip install -r requirements.txt
+   pip install -r requirements-pythonanywhere.txt
    ```
 
    Select the same Python version when creating the web app. If `/usr/bin/python3.13` is unavailable, use a Python version offered by PythonAnywhere.
 
 3. In the PythonAnywhere **Web** tab, choose **Add a new web app**, then **Manual configuration** and the matching Python version. In the **Virtualenv** section, enter `~/.virtualenvs/securenet-venv`.
-4. Open the WSGI configuration file linked on the Web tab. Replace its Flask application section with the following, changing both occurrences of `YOUR_USERNAME` to your PythonAnywhere username:
+4. Open the WSGI configuration file linked on the Web tab. Replace its Flask application section with the following, changing each occurrence of `YOUR_USERNAME` to your PythonAnywhere username:
 
    ```python
    import os
@@ -44,6 +44,7 @@ PythonAnywhere provides a public HTTPS website address for the Flask application
 
    os.environ["DATABASE_URL"] = "sqlite:////home/YOUR_USERNAME/securenet.sqlite3"
    os.environ["SECURE_COOKIES"] = "true"
+   os.environ["ALLOWED_HOSTS"] = "YOUR_USERNAME.pythonanywhere.com"
 
    from app import app as application
    ```
@@ -51,6 +52,8 @@ PythonAnywhere provides a public HTTPS website address for the Flask application
 5. Save the WSGI file, return to the Web tab, and click **Reload**. Open the web-app URL shown there and register a new account.
 
 The SQLite database is placed in your home directory rather than beside the code, so Git pulls and app reloads do not replace it. Keep the database private and use a unique password. To publish later code changes, push them to GitHub, then run `cd ~/PublicWifiScanner && git pull` in the PythonAnywhere console and reload the web app.
+
+The PythonAnywhere requirements file omits PostgreSQL and Gunicorn because this deployment uses SQLite and PythonAnywhere's WSGI server. The main `requirements.txt` remains for Render.
 
 For official provider-specific instructions, see [PythonAnywhere's Flask setup guide](https://help.pythonanywhere.com/pages/Flask/).
 
