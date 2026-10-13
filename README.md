@@ -1,6 +1,8 @@
-# SecureNet Public WiFi Risk Scanner
+# PublicWifiScanner
 
-An educational project that demonstrates simulated public WiFi risk profiles. It does not scan or assess real networks.
+**Educational public WiFi security awareness site featuring simulated risk analysis, safety tips, attack scenarios, and downloadable reports.**
+
+SecureNet demonstrates simulated public WiFi risk profiles. It does not scan or assess real networks.
 
 ## Run locally
 
