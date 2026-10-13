@@ -32,28 +32,24 @@ PythonAnywhere provides a public HTTPS website address for the Flask application
    Select the same Python version when creating the web app. If `/usr/bin/python3.13` is unavailable, use a Python version offered by PythonAnywhere.
 
 3. In the PythonAnywhere **Web** tab, choose **Add a new web app**, then **Manual configuration** and the matching Python version. In the **Virtualenv** section, enter `~/.virtualenvs/securenet-venv`.
-4. Open the WSGI configuration file linked on the Web tab. Replace its Flask application section with the following, changing each occurrence of `YOUR_USERNAME` to your PythonAnywhere username:
+4. Open the WSGI configuration file linked on the Web tab. Replace its contents with the following:
 
    ```python
    import os
    import sys
 
-   project_path = "/home/YOUR_USERNAME/PublicWifiScanner"
+   project_path = os.path.join(os.path.expanduser("~"), "PublicWifiScanner")
    if project_path not in sys.path:
        sys.path.insert(0, project_path)
 
-   os.environ["DATABASE_URL"] = "sqlite:////home/YOUR_USERNAME/securenet.sqlite3"
-   os.environ["SECURE_COOKIES"] = "true"
-   os.environ["ALLOWED_HOSTS"] = "YOUR_USERNAME.pythonanywhere.com"
-
-   from app import app as application
+   from pythonanywhere_wsgi import application
    ```
 
 5. Save the WSGI file, return to the Web tab, and click **Reload**. Open the web-app URL shown there and register a new account.
 
-The SQLite database is placed in your home directory rather than beside the code, so Git pulls and app reloads do not replace it. Keep the database private and use a unique password. To publish later code changes, push them to GitHub, then run `cd ~/PublicWifiScanner && git pull` in the PythonAnywhere console and reload the web app.
+The WSGI helper automatically enables HTTPS-only session cookies and puts SQLite in your home directory rather than beside the code, so Git pulls and app reloads do not replace the database. Keep the database private and use a unique password. To publish later code changes, push them to GitHub, then run `cd ~/PublicWifiScanner && git pull` in the PythonAnywhere console and reload the web app.
 
-The PythonAnywhere requirements file omits PostgreSQL and Gunicorn because this deployment uses SQLite and PythonAnywhere's WSGI server. The main `requirements.txt` remains for Render.
+The PythonAnywhere requirements file omits PostgreSQL and Gunicorn because this deployment uses SQLite and PythonAnywhere's WSGI server. The main `requirements.txt` remains for Render. If you have already cloned the repository in PythonAnywhere, update it with `cd ~/PublicWifiScanner && git pull` before configuring or reloading.
 
 For official provider-specific instructions, see [PythonAnywhere's Flask setup guide](https://help.pythonanywhere.com/pages/Flask/).
 
